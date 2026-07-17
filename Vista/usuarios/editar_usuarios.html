@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Usuario | Plataforma DAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 600px;">
+            <div class="card-body p-5">
+                <h3 class="fw-bold text-warning mb-4">Modificar Datos del Usuario</h3>
+                <form id="formForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Nombre Completo</label>
+                        <input type="text" id="nombre" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Correo Electrónico</label>
+                        <input type="email" id="correo" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">Rol del Sistema</label>
+                        <select id="rol" class="form-select bg-light border-0" required>
+                            <option value="Alumno">Alumno</option>
+                            <option value="Docente">Docente</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Actualizar Datos</button>
+                        <a href="lista_usuarios.html" class="btn btn-secondary fw-bold w-100">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/navegacion.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let id_usuario = localStorage.getItem("editarUsuarioID");
+            if(!id_usuario) { window.location.href = "lista_usuarios.html"; return; }
+
+            // Cargar datos actuales
+            fetch(`../../controlador/UsuarioControlador.php?accion=obtener&id_usuario=${id_usuario}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    document.getElementById("nombre").value = data.usuario.nombre;
+                    document.getElementById("correo").value = data.usuario.correo;
+                    document.getElementById("rol").value = data.usuario.rol;
+                } else {
+                    window.location.href = "lista_usuarios.html";
+                }
+            });
+
+            // Actualizar datos
+            document.getElementById("formForm").addEventListener("submit", function(e){
+                e.preventDefault();
+                let formData = new FormData();
+                formData.append('accion', 'actualizar');
+                formData.append('id_usuario', id_usuario);
+                formData.append('nombre', document.getElementById("nombre").value);
+                formData.append('correo', document.getElementById("correo").value);
+                formData.append('rol', document.getElementById("rol").value);
+
+                fetch('../../controlador/UsuarioControlador.php', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        alert("Usuario actualizado correctamente");
+                        window.location.href = "lista_usuarios.html";
+                    } else { alert(data.mensaje); }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

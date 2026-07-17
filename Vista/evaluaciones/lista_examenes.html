@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluaciones Programadas | Plataforma DAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-primary">Cronograma de Exámenes</h2>
+            <a href="crear_examen.html" class="btn btn-danger fw-bold shadow-sm" id="btnCrearExamen">
+                + Programar Evaluación
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div id="mensajeLista" class="alert d-none" role="alert"></div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Título del Examen</th>
+                                <th>Curso / Materia</th>
+                                <th>Fecha</th>
+                                <th>Duración</th>
+                                <th>Preguntas</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaExamenes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="../dashboard.html" class="btn btn-secondary btn-sm fw-bold">← Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <script src="../js/navegacion.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const usuarioActivo = JSON.parse(localStorage.getItem('usuarioActivo'));
+            const tabla = document.getElementById('tablaExamenes');
+            const mensaje = document.getElementById('mensajeLista');
+            const esAlumno = usuarioActivo && usuarioActivo.rol === 'Alumno';
+
+            if (esAlumno) {
+                document.getElementById('btnCrearExamen').style.display = 'none';
+            }
+
+            function escapar(texto) {
+                const elemento = document.createElement('div');
+                elemento.textContent = texto ?? '';
+                return elemento.innerHTML;
+            }
+
+            async function cargarExamenes() {
+                tabla.innerHTML = "<tr><td colspan='6' class='text-center text-muted py-3'>Cargando...</td></tr>";
+                mensaje.className = 'alert d-none';
+
+                try {
+                    // GET mediante fetch: carga asíncrona (AJAX) de las evaluaciones.
+                    const response = await fetch('../../controlador/ExamenControlador.php?accion=listar');
+                    const data = await response.json();
+
+                    if (!response.ok || data.status !== 'success') {
+                        throw new Error(data.mensaje || 'No fue posible cargar las evaluaciones.');
+                    }
+
+                    tabla.innerHTML = '';
+                    if (data.data.length === 0) {
+                        tabla.innerHTML = "<tr><td colspan='6' class='text-center text-muted py-3'>No hay exámenes agendados.</td></tr>";
+                        return;
+                    }
+
+                    data.data.forEach(function (examen) {
+                        const totalPreguntas = Number(examen.total_preguntas || 0);
+                        let botones;
+
+                        if (esAlumno) {
+                            botones = totalPreguntas > 0
+                                ? `<button class="btn btn-outline-danger btn-sm fw-bold w-100" onclick="resolver(${examen.id_examen})">Resolver Examen</button>`
+                                : `<button class="btn btn-outline-secondary btn-sm fw-bold w-100" disabled>Sin preguntas</button>`;
+                        } else {
+                            botones = `
+                                <button class="btn btn-outline-danger btn-sm fw-bold" onclick="resolver(${examen.id_examen})">Ver</button>
+                                <button class="btn btn-warning btn-sm text-dark fw-bold" onclick="editar(${examen.id_examen})">Editar</button>
+                                <button class="btn btn-dark btn-sm fw-bold" onclick="eliminar(${examen.id_examen})">Eliminar</button>`;
+                        }
+
+                        tabla.insertAdjacentHTML('beforeend', `
+                            <tr>
+                                <td class="fw-bold text-dark">${escapar(examen.titulo)}</td>
+                                <td class="text-secondary">${escapar(examen.curso)}</td>
+                                <td>${escapar(examen.fecha)}</td>
+                                <td><span class="badge bg-dark">${Number(examen.duracion)} minutos</span></td>
+                                <td><span class="badge ${totalPreguntas > 0 ? 'bg-primary' : 'bg-secondary'}">${totalPreguntas}</span></td>
+                                <td><div class="d-flex gap-1 justify-content-center">${botones}</div></td>
+                            </tr>`);
+                    });
+                } catch (error) {
+                    tabla.innerHTML = '';
+                    mensaje.textContent = error.message;
+                    mensaje.className = 'alert alert-danger';
+                }
+            }
+
+            window.eliminar = async function (idExamen) {
+                if (!confirm('¿Está seguro de eliminar esta evaluación, sus preguntas y respuestas?')) return;
+
+                const formData = new FormData();
+                formData.append('accion', 'eliminar');
+                formData.append('id_examen', idExamen);
+
+                try {
+                    const response = await fetch('../../controlador/ExamenControlador.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok || data.status !== 'success') {
+                        throw new Error(data.mensaje || 'No fue posible eliminar la evaluación.');
+                    }
+
+                    cargarExamenes();
+                } catch (error) {
+                    alert(error.message);
+                }
+            };
+
+            window.editar = function (idExamen) {
+                localStorage.setItem('editarExamenID', idExamen);
+                window.location.href = 'editar_examen.html';
+            };
+
+            window.resolver = function (idExamen) {
+                localStorage.setItem('detalleExamenID', idExamen);
+                window.location.href = 'detalle_examen.html';
+            };
+
+            cargarExamenes();
+        });
+    </script>
+</body>
+</html>

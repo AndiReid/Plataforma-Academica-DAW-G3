@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Tarea | Plataforma DAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 600px;">
+            <div class="card-body p-5">
+                <h3 class="fw-bold text-primary mb-4">Asignar Nueva Tarea</h3>
+                <form id="formCrearTarea">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Título de la Tarea</label>
+                        <input type="text" id="tituloTarea" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Curso / Materia</label>
+                        <input type="text" id="cursoTarea" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Fecha Límite</label>
+                        <input type="date" id="fechaTarea" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">Instrucciones / Descripción</label>
+                        <textarea id="descripcionTarea" class="form-control bg-light border-0" rows="4" required></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold w-100">Guardar Tarea</button>
+                        <a href="lista_tareas.html" class="btn btn-secondary fw-bold w-100">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/navegacion.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("formCrearTarea").addEventListener("submit", function(e){
+                e.preventDefault();
+                let formData = new FormData();
+                formData.append('accion', 'registrar');
+                formData.append('titulo', document.getElementById("tituloTarea").value);
+                formData.append('curso', document.getElementById("cursoTarea").value);
+                formData.append('fecha_limite', document.getElementById("fechaTarea").value);
+                formData.append('descripcion', document.getElementById("descripcionTarea").value);
+
+                fetch('../../controlador/TareaControlador.php', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        alert("Tarea asignada exitosamente.");
+                        window.location.href = "lista_tareas.html";
+                    } else { alert(data.mensaje); }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>

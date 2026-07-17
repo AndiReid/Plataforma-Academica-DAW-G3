@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | Plataforma DAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="Vista/css/estilos.css">
+    <style>
+        .login-side { background: linear-gradient(135deg, #0f172a, #1e3a8a); color: white; }
+        .min-vh-100 { min-height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row min-vh-100">
+            <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center login-side p-5 text-center">
+                <h1 class="display-4 fw-bold mb-3">Plataforma Académica</h1>
+                <p class="lead opacity-75">Sistema integral de gestión de aprendizaje. Inicie sesión para acceder a sus cursos, tareas y evaluaciones.</p>
+                <div class="mt-5 border-top border-light opacity-50 pt-4 w-75">
+                    <small>Proyecto DAW - Grupo 3</small>
+                </div>
+            </div>
+
+            <div class="col-lg-6 d-flex justify-content-center align-items-center bg-white p-5">
+                <div class="w-100" style="max-width: 400px;">
+                    <div class="text-center mb-5 d-lg-none">
+                        <h2 class="fw-bold text-primary">Plataforma DAW</h2>
+                    </div>
+                    
+                    <h3 class="fw-bold text-dark mb-1">Bienvenido de nuevo</h3>
+                    <p class="text-muted mb-4">Por favor, ingrese sus credenciales para continuar.</p>
+
+                    <form id="formLogin">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Correo Electrónico</label>
+                            <input type="email" id="loginCorreo" class="form-control form-control-lg bg-light border-0" placeholder="usuario@institucion.edu" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-secondary small">Contraseña</label>
+                            <input type="password" id="loginClave" class="form-control form-control-lg bg-light border-0" placeholder="••••••••" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold rounded-3 mb-3 shadow-sm">Iniciar Sesión</button>
+                        
+                        <div class="text-center">
+                            <span class="text-muted small">¿No tiene una cuenta?</span> 
+                            <a href="Vista/registro.html" class="text-primary fw-bold text-decoration-none small">Regístrese aquí</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("formLogin").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            let formData = new FormData();
+            formData.append('accion', 'login');
+            formData.append('correo', document.getElementById("loginCorreo").value);
+            formData.append('clave', document.getElementById("loginClave").value);
+
+            
+            fetch('controlador/UsuarioControlador.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+                  
+                    window.location.href = "Vista/dashboard.html";
+                } else {
+                    alert(data.mensaje);
+                }
+            })
+            .catch(error => console.error('Error en la petición AJAX:', error));
+        });
+    </script>
+</body>
+</html>

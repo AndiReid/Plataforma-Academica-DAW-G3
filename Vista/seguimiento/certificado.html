@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado Oficial | Plataforma DAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .cert-border { border: 10px double #1e3a8a; padding: 40px; background-color: #fbfbfb; }
+        .cert-title { font-family: 'Georgia', serif; color: #1e3a8a; font-size: 42px; }
+        @media print { .no-print { display: none; } body { background-white: true; } }
+    </style>
+</head>
+<body class="bg-secondary bg-opacity-10 py-5">
+    <div class="container">
+        
+        <div class="card shadow-lg mx-auto border-0 rounded-3 bg-white" style="max-width: 850px;">
+            <div class="card-body p-2">
+                <div class="cert-border text-center">
+                    <div class="text-end text-muted small opacity-50 mb-3">ID: REF-DAW-2026</div>
+                    <h5 class="text-uppercase fw-bold tracking-wider text-muted mb-4" style="letter-spacing: 3px;">Certificado de Aprovechamiento</h5>
+                    <p class="lead italic text-secondary mb-1">Otorgado con honores a:</p>
+                    <h2 class="fw-bold text-dark border-bottom border-secondary d-inline-block px-5 pb-2 mb-4" id="certAlumno">Estudiante Académico</h2>
+                    <p class="mx-auto text-muted mb-4" style="max-width: 600px; font-size: 17px;">
+                        Por haber cursado, completado y aprobado satisfactoriamente el 100% de las actividades teóricas y talleres de desarrollo práctico correspondientes a la materia de:
+                    </p>
+                    <h3 class="cert-title fw-bold mb-5" id="certCurso">Módulo de Especialización</h3>
+                    
+                    <div class="row mt-5 pt-3">
+                        <div class="col-6">
+                            <div class="mx-auto border-top border-dark text-muted pt-2 w-75 small">Dirección Académica</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mx-auto border-top border-dark text-muted pt-2 w-75 small">Firma Digital del Docente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 no-print">
+            <button class="btn btn-primary fw-bold px-4 shadow-sm" onclick="window.print()">
+                🖨 Imprimir / Guardar en PDF
+            </button>
+            <a href="Progreso.html" class="btn btn-outline-secondary fw-bold px-4 ms-2">
+                Volver al Panel
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let usuario = JSON.parse(localStorage.getItem("usuarioActivo"));
+            let curso = localStorage.getItem("cursoCertificado");
+
+            if (usuario) {
+                document.getElementById("certAlumno").innerText = usuario.nombre;
+            }
+            if (curso) {
+                document.getElementById("certCurso").innerText = curso;
+            }
+        });
+    </script>
+</body>
+</html>
